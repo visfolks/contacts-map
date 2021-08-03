@@ -1,9 +1,62 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Contacts Map</title>
-  </head>
-  <body>
-    <script src="js/mds.js"></script>
-  </body>
-</html>
+
+
+<input type="file" id="file_input" accept=".csv" />
+<div id="output_field"></div>
+
+<div id="chart"></div>
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+<!-- Create a div where the graph will take place -->
+<div id="datavis"></div>
+
+
+<script>
+  function handleFileSelect(evt) {
+      var file = evt.target.files[0];
+      var reader = new FileReader();
+      reader.onload = (function(theFile) {
+          return function(e) {
+              drawChart(e.target.result);
+            };
+        })(file);
+
+      reader.readAsDataURL(file);
+    }
+
+    document.getElementById('file_input').addEventListener('change', handleFileSelect, false);
+
+
+    // set the dimensions and margins of the graph
+    var margin = {top: 10, right: 30, bottom: 30, left: 60},
+      width = 460 - margin.left - margin.right,
+      height = 400 - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    var svg = d3.select("#datavis")
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+    function drawChart(url){
+
+        d3.csv(url, function(error, data){
+            console.log(data)
+            // Add dots
+            svg.append('g')
+              .selectAll("dot")
+              .data(data)
+              .enter()
+              .append("circle")
+              .attr("cx", function (d) { return +d.x; } )
+              .attr("cy", function (d) { return +d.y; } )
+              .attr("r", 1.5)
+              .style("fill", "#69b3a2") 
+          });
+
+
+
+      };
+</script>
