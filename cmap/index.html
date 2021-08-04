@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js"></script>
+    <script src="./js/mds.js"></script>
+
+    <script src="../libs/papaparse.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/index.css">
+    <title>Multidimensional Scaling</title>
+  </head>
+  <body>
+    <svg width="960px" height="500px"></svg>
+    <script src="js/mds.js"></script>
+  </body>
+</html>
+
+
+
+<input type="file" id="file_input" accept=".csv" />
+<div id="output_field"></div>
+
+
+<!-- Create a div where the graph will take place -->
+<div id="datavis"></div>
+
+
+<script>
+  function handleFileSelect(evt) {
+      var file = evt.target.files[0];
+      var reader = new FileReader();
+      reader.onload = (function(theFile) {
+          return function(e) {
+             draw_plot(e.target.result);
+              //drawChart(e.target.files[0]);
+            };
+        })(file);
+
+      //reader.readAsDataURL(file);
+      reader.readAsText(file);
+    }
+
+    document.getElementById('file_input').addEventListener('change', handleFileSelect, false);
+
+
+
+
+
+
+</script>
