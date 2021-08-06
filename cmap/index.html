@@ -12,7 +12,8 @@
   </head>
   <body>
     <svg width="960px" height="500px"></svg>
-    <script src="js/mds.js"></script>
+    <!-- <script src="./js/jaccard.js"></script> -->
+    <!-- <script src="./wasm/run_jaccard.js"></script> -->
   </body>
 </html>
 
@@ -32,20 +33,27 @@
       var reader = new FileReader();
       reader.onload = (function(theFile) {
           return function(e) {
-             draw_plot(e.target.result);
+
+             // get names and dist matrix
+             [fnames, fvecs, m, n] = process_file(e.target.result);
+              
+              [dmat] = jaccard(fvecs, m, n);
+
+             //draw_plot(e.target.result, fnames, dmat);
               //drawChart(e.target.files[0]);
             };
         })(file);
 
       //reader.readAsDataURL(file);
       reader.readAsText(file);
+
+
+
+
+
+
     }
 
     document.getElementById('file_input').addEventListener('change', handleFileSelect, false);
-
-
-
-
-
 
 </script>
