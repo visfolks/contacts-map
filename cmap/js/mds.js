@@ -22,32 +22,54 @@ function process_file(url) {
       }
         //     mat.push(results.data[row].map(Number));
     }
+  m = fnames.length;
+  n = fvecs[0].length;
     return [fnames, fvecs, m, n];
 }
 function jaccard(fvecs, m, n ){
 
   console.log(fnames);
-  console.log(fvecs)
-  var dmat = []
-    console.log("hellof");
+  console.log(fvecs);
+  console.log(m, n);
 
+  var dmat = new Array(m);
+  for (var i = 0; i < m; i++) {
+  dmat[i] = new Array(n); // make each element an array
+}
+
+  for (var i=0; i<m ; i++){
+
+    for (var j=i+1; j<m; j++){
+
+      var uni = 0;
+      var inter =0;
+
+      for (var k=0; k<n; k++){
+        uni = uni + (fvecs[i][k] || fvecs[j][k]);
+        inter = inter + (fvecs[i][k] && fvecs[j][k]);
+        // console.log(fvecs[i+k] || fvecs[j*n+k]);
+      }
+
+      dmat[i][j] = ((uni-inter))/(uni);
+      dmat[j][i] = dmat[i][j];
+    }
+      dmat[i][i] = 0;
+  }
+
+  console.log(dmat);
   return [dmat]
 }
 
-function draw_plot(url, fnames, dmat) {
+function draw_plot(fnames, dmat) {
     // extract feature vectors
-    var fvecs;
-    var m;
-    var n;
-    var dmat;
-    
     // get Jaccard distances
-    jaccard(fvecs, m, n, dmat);
-    var results = Papa.parse(url, {
-        header: false,
-        dynamicTypeing: true
-    });
-    var m = convert_pp_to_array(results);
+    // jaccard(fvecs, m, n, dmat);
+    // var results = Papa.parse(url, {
+    //     header: false,
+    //     dynamicTypeing: true
+    // });
+    // var m = convert_pp_to_array(results);
+    var m = dmat;
     console.log(m);
     //d3.csv(url, function(error, data){
     //console.log(data)
@@ -66,8 +88,10 @@ function draw_plot(url, fnames, dmat) {
     svg = d3.select('svg');
     width = svg.node().getBoundingClientRect().width;
     height = svg.node().getBoundingClientRect().height;
-    keys = [..."abcdefghijklmnopqrstuvwzyz"];
+    // keys = [..."abcdefghijklmnopqrstuvwzyz"];
+    keys = fnames;
     points_data = mds_classic(m);
+    console.log(points_data);
     min_x = d3.min(points_data, function (d) {
         return d[0];
     });
@@ -78,41 +102,42 @@ function draw_plot(url, fnames, dmat) {
         return d[1];
     });
     max_y = d3.max(points_data, function (d) {
-        return d[1].name;
+        return d[1];
     });
+
     x = d3.scale.linear().domain([max_x, min_x]).range([MARGIN, width - MARGIN]);
     y = d3.scale.linear().domain([min_y, max_y]).range([MARGIN, height - MARGIN]);
-    links_data = [];
-    points_data.forEach(function (p1, i1) {
-        var array;
-        array = [];
-        points_data.forEach(function (p2, i2) {
-            if (i1 !== i2) {
-                return array.push({
-                    source: p1,
-                    target: p2,
-                    dist: m[i1][i2]
-                });
-            }
-        });
-        return links_data = links_data.concat(array);
-    });
-    links = svg.selectAll('.link').data(links_data);
-    links.enter().append('line').attr({
-        "class": 'link',
-        x1: function (d) {
-            return x(d.source[0]);
-        },
-        y1: function (d) {
-            return y(d.source[1]);
-        },
-        x2: function (d) {
-            return x(d.target[0]);
-        },
-        y2: function (d) {
-            return y(d.target[1]);
-        }
-    });
+    // links_data = [];
+    // points_data.forEach(function (p1, i1) {
+    //     var array;
+    //     array = [];
+    //     points_data.forEach(function (p2, i2) {
+    //         if (i1 !== i2) {
+    //             return array.push({
+    //                 source: p1,
+    //                 target: p2,
+    //                 dist: m[i1][i2]
+    //             });
+    //         }
+    //     });
+    //     return links_data = links_data.concat(array);
+    // });
+    // links = svg.selectAll('.link').data(links_data);
+    // links.enter().append('line').attr({
+    //     "class": 'link',
+    //     x1: function (d) {
+    //         return x(d.source[0]);
+    //     },
+    //     y1: function (d) {
+    //         return y(d.source[1]);
+    //     },
+    //     x2: function (d) {
+    //         return x(d.target[0]);
+    //     },
+    //     y2: function (d) {
+    //         return y(d.target[1]);
+    //     }
+    // });
     points = svg.selectAll('.point').data(points_data);
     enter_points = points.enter().append('g').attr({
         "class": 'point',
@@ -139,7 +164,7 @@ function draw_plot(url, fnames, dmat) {
     enter_points.on('click', function (d) {
     });
 }
-;
+
 function convert_pp_to_array(results) {
     var mat = [];
     for (var row in results.data) {
