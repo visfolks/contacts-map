@@ -85,6 +85,7 @@ function draw_plot(fnames, dmat) {
     //   .style("fill", "#69b3a2") 
     // });
     MARGIN = 100;
+    d3.selectAll("svg > *").remove();
     svg = d3.select('svg');
     width = svg.node().getBoundingClientRect().width;
     height = svg.node().getBoundingClientRect().height;
