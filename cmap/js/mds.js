@@ -71,19 +71,6 @@ function draw_plot(fnames, dmat) {
     // var m = convert_pp_to_array(results);
     var m = dmat;
     console.log(m);
-    //d3.csv(url, function(error, data){
-    //console.log(data)
-    // Add dots
-    // svg.append('g')
-    //   .selectAll("dot")
-    //   .data(data)
-    //   .enter()
-    //   .append("circle")
-    //   .attr("cx", function (d) { return +d.x; } )
-    //   .attr("cy", function (d) { return +d.y; } )
-    //   .attr("r", 1.5)
-    //   .style("fill", "#69b3a2") 
-    // });
     MARGIN = 100;
     d3.selectAll("svg > *").remove();
     svg = d3.select('svg');
@@ -106,64 +93,98 @@ function draw_plot(fnames, dmat) {
         return d[1];
     });
 
-    x = d3.scale.linear().domain([max_x, min_x]).range([MARGIN, width - MARGIN]);
-    y = d3.scale.linear().domain([min_y, max_y]).range([MARGIN, height - MARGIN]);
-    // links_data = [];
-    // points_data.forEach(function (p1, i1) {
-    //     var array;
-    //     array = [];
-    //     points_data.forEach(function (p2, i2) {
-    //         if (i1 !== i2) {
-    //             return array.push({
-    //                 source: p1,
-    //                 target: p2,
-    //                 dist: m[i1][i2]
-    //             });
-    //         }
-    //     });
-    //     return links_data = links_data.concat(array);
-    // });
-    // links = svg.selectAll('.link').data(links_data);
-    // links.enter().append('line').attr({
-    //     "class": 'link',
-    //     x1: function (d) {
-    //         return x(d.source[0]);
-    //     },
-    //     y1: function (d) {
-    //         return y(d.source[1]);
-    //     },
-    //     x2: function (d) {
-    //         return x(d.target[0]);
-    //     },
-    //     y2: function (d) {
-    //         return y(d.target[1]);
+    x = d3.scaleLinear().domain([max_x, min_x]).range([MARGIN, width - MARGIN]);
+    y = d3.scaleLinear().domain([min_y, max_y]).range([MARGIN, height - MARGIN]);
+  
+    var points_obj = get_points_obj (points_data);
+    console.log(points_obj);
+
+    var simulation = d3.forceSimulation(points_obj)
+	.force('x', d3.forceX().x(function(d) {
+    return x(d.xpos);
+  }))
+  .force('y', d3.forceY().y(function(d) {
+    return y(d.ypos);
+  }))
+    .force('collision', d3.forceCollide().radius(function(d) {
+		return d.radius
+	}))
+	.on('tick', ticked);
+
+function ticked() {
+	var u = d3.select('svg')
+		.selectAll('.point')
+		.data(points_obj);
+
+  var enter_points = 
+  u.join('g')
+  .attr("class","point")
+    .attr("transform", function(d){
+      return "translate(" + ((d.x)) + "," + (d.y) + ")"
+    });
+  
+		enter_points.append('circle')
+		.attr('r', function(d) {
+			return d.radius
+		})
+		.attr('cx', function(d) {
+			return 0;
+		})
+		.attr('cy', function(d) {
+			return 0;
+		});
+
+   enter_points.append('text')
+    .attr("dx", 12)
+    .attr("dy", ".35em")
+    .text(function (d, i) {
+        return keys[i];
+    });
+}
+
+
+  // u.append("text").text(function(d,i){
+  //   return keys[i];
+  // })
+  // .attr("dx", "0.35em")
+  // .attr("y", 12);
+
+    // // points = svg.selectAll('.point').data(points_data);
+    // enter_points = points.enter().append('g').attr({
+    //     "class": 'point',
+    //     transform: function (d) {
+    //         return "translate(" + (x(d[0])) + "," + (y(d[1])) + ")";
     //     }
     // });
-    points = svg.selectAll('.point').data(points_data);
-    enter_points = points.enter().append('g').attr({
-        "class": 'point',
-        transform: function (d) {
-            return "translate(" + (x(d[0])) + "," + (y(d[1])) + ")";
-        }
-    });
-    enter_points.append('circle').attr({
-        r: 6,
-        opacity: 0.3
-    });
-    enter_points.append('circle').attr({
-        r: 4
-    });
-    enter_points.append('text').text(function (d, i) {
-        return keys[i];
-    }).attr({
-        y: 12,
-        dy: '0.35em'
-    });
-    enter_points.append('title').text(function (d, i) {
-        return d[0] + ", " + d[1];
-    });
-    enter_points.on('click', function (d) {
-    });
+    // enter_points.append('circle').attr({
+    //     r: 6,
+    //     opacity: 0.3
+    // });
+    // enter_points.append('circle').attr({
+    //     r: 4
+    // });
+    // enter_points.append('text').text(function (d, i) {
+    //     return keys[i];
+    // }).attr({
+    //     y: 12,
+    //     dy: '0.35em'
+    // });
+    // enter_points.append('title').text(function (d, i) {
+    //     return d[0] + ", " + d[1];
+    // });
+    // enter_points.on('click', function (d) {
+    // });
+}
+
+function get_points_obj(points_data){
+
+  points_obj = [];
+
+  for (idx in points_data){
+    var pt = points_data[idx];
+    points_obj.push({"xpos":pt[0], "ypos":pt[1], "radius": 7});
+  }
+  return points_obj;
 }
 
 function convert_pp_to_array(results) {
